@@ -1,0 +1,42 @@
+@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="col-md-5 col-lg-4">
+        <div class="card p-4">
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <h1 class="card-title font-weight-bold" style="color: var(--primary-accent); letter-spacing: -0.5px;">Join the Fun</h1>
+                    <p class="text-muted" style="font-size: 1.1rem;">Create an account to start joking.</p>
+                </div>
+                
+                <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                    <div class="form-group mb-3">
+                        <input asp-for="Input.Email" class="form-control form-control-lg" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                        <span asp-validation-for="Input.Email" class="text-danger small mt-1 d-block"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <input asp-for="Input.Password" class="form-control form-control-lg" autocomplete="new-password" aria-required="true" placeholder="password" />
+                        <span asp-validation-for="Input.Password" class="text-danger small mt-1 d-block"></span>
+                    </div>
+                    <div class="form-group mb-4">
+                        <input asp-for="Input.ConfirmPassword" class="form-control form-control-lg" autocomplete="new-password" aria-required="true" placeholder="confirm password" />
+                        <span asp-validation-for="Input.ConfirmPassword" class="text-danger small mt-1 d-block"></span>
+                    </div>
+                    <button id="registerSubmit" type="submit" class="btn btn-primary btn-lg w-100 mb-3">Register</button>
+                    <div class="text-center mt-3">
+                        <p class="text-muted small mb-0">Already have an account? <a asp-page="./Login" style="color: var(--primary-accent);">Log in here</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

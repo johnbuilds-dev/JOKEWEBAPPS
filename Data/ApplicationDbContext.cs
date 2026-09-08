@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -13,6 +13,25 @@ namespace JOKEWEBAPPS.Data
             : base(options)
         {
         }
-        public DbSet<JOKEWEBAPPS.Models.Joke> Joke { get; set; }
+        
+        public DbSet<Joke> Joke { get; set; }
+        public DbSet<Upvote> Upvote { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<Upvote>()
+                .HasOne(u => u.Joke)
+                .WithMany(j => j.Upvotes)
+                .HasForeignKey(u => u.JokeId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Upvote>()
+                .HasOne(u => u.User)
+                .WithMany()
+                .HasForeignKey(u => u.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
     }
 }

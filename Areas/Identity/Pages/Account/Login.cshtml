@@ -1,0 +1,52 @@
+@page
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Log in";
+}
+
+<div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="col-md-5 col-lg-4">
+        <div class="card p-4">
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <h1 class="card-title font-weight-bold" style="color: var(--primary-accent); letter-spacing: -0.5px;">Welcome Back</h1>
+                    <p class="text-muted" style="font-size: 1.1rem;">Log in to share and upvote jokes.</p>
+                </div>
+                
+                <section>
+                    <form id="account" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                        <div class="form-group mb-3">
+                            <input asp-for="Input.Email" class="form-control form-control-lg" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                            <span asp-validation-for="Input.Email" class="text-danger small mt-1 d-block"></span>
+                        </div>
+                        <div class="form-group mb-4">
+                            <input asp-for="Input.Password" class="form-control form-control-lg" autocomplete="current-password" aria-required="true" placeholder="password" />
+                            <span asp-validation-for="Input.Password" class="text-danger small mt-1 d-block"></span>
+                        </div>
+                        <div class="form-group mb-4 d-flex justify-content-between align-items-center">
+                            <div class="custom-control custom-checkbox">
+                                <input asp-for="Input.RememberMe" class="custom-control-input" id="customCheck1">
+                                <label class="custom-control-label text-muted" for="customCheck1">
+                                    @Html.DisplayNameFor(m => m.Input.RememberMe)
+                                </label>
+                            </div>
+                            <a id="forgot-password" asp-page="./ForgotPassword" class="small" style="color: var(--secondary-accent);">Forgot password?</a>
+                        </div>
+                        <div class="form-group mb-3">
+                            <button id="login-submit" type="submit" class="btn btn-primary btn-lg w-100">Log in</button>
+                        </div>
+                        <div class="text-center mt-4">
+                            <p class="text-muted small mb-0">Don't have an account? <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" style="color: var(--primary-accent);">Register as a new user</a></p>
+                        </div>
+                    </form>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

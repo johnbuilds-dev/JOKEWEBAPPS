@@ -1,35 +1,43 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - JOKEWEBAPPS</title>
+    <base href="~/" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
+    <script>
+        const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
 </head>
 <body>
+    <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Dark Mode">
+        <span class="theme-icon-light">🌞</span>
+        <span class="theme-icon-dark">🌙</span>
+    </button>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">JOKEWEBAPPS</a>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm mb-4">
+            <div class="container d-flex justify-content-between align-items-center">
+                <a class="navbar-brand font-weight-bold" asp-area="" asp-controller="Home" asp-action="Index">
+                    <span style="font-size: 2rem;">🎙️</span> JOKEWEBAPPS
+                </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
                     <partial name="_LoginPartial" />
-                    <ul class="navbar-nav flex-grow-1">
+                    <ul class="navbar-nav flex-grow-1 align-items-center">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Feed</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link" asp-area="" asp-controller="Jokes" asp-action="Index">Archives</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Jokes" asp-action="Index">Jokes</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Jokes" asp-action="ShowSearchForm">Search</a>
+                            <a class="nav-link" asp-area="" asp-controller="Jokes" asp-action="ShowSearchForm">Search</a>
                         </li>
                     </ul>
                 </div>
@@ -42,14 +50,15 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2021 - JOKEWEBAPPS - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <footer class="footer mt-auto py-4">
+        <div class="container text-center">
+            <span class="text-muted">&copy; @DateTime.Now.Year - JOKEWEBAPPS - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy Policy</a></span>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="_framework/blazor.server.js"></script>
     @RenderSection("Scripts", required: false)
 </body>
 </html>

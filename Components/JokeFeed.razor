@@ -1,0 +1,230 @@
+@page "/feed"
+@using JOKEWEBAPPS.Data
+@using Microsoft.EntityFrameworkCore
+@using System.Threading
+@inject ApplicationDbContext DbContext
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavManager
+
+<div class="row">
+    <div class="col-md-8 offset-md-2" style="max-width: 680px; margin: 0 auto;">
+        
+        @if (currentUserId != null)
+        {
+            <div class="card mb-5">
+                <div class="card-body">
+                    <h4 class="card-title mb-4" style="color: var(--primary-accent);">Got a joke? Drop it here.</h4>
+                    <div class="form-group mb-3">
+                        <input @bind="newJokeQuestion" @bind:event="oninput" class="form-control form-control-lg" placeholder="The setup (e.g. Why did the chicken...)" disabled="@(IsAiThinking || IsAiTyping)" />
+                    </div>
+                    
+                    @if (IsAiThinking)
+                    {
+                        <div class="ai-loading-container">
+                            <div class="pixel-grid">
+                                <span class="pixel" style="animation: pixel-on 650ms ease-in-out 90ms infinite"></span>
+                                <span class="pixel" style="animation: pixel-on 650ms ease-in-out 180ms infinite"></span>
+                                <span class="pixel" style="animation: pixel-on 650ms ease-in-out 270ms infinite"></span>
+                                <span class="pixel" style="animation: pixel-on 650ms ease-in-out 0ms infinite"></span>
+                                <span class="pixel" style="animation: pixel-on 650ms ease-in-out 90ms infinite"></span>
+                                <span class="pixel" style="animation: pixel-on 650ms ease-in-out 180ms infinite"></span>
+                                <span class="pixel" style="animation: pixel-on 650ms ease-in-out 90ms infinite"></span>
+                                <span class="pixel" style="animation: pixel-on 650ms ease-in-out 180ms infinite"></span>
+                                <span class="pixel" style="animation: pixel-on 650ms ease-in-out 270ms infinite"></span>
+                            </div>
+                            <span class="shimmer-text">AI is churning...</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="form-group mb-4">
+                            <textarea @bind="newJokeAnswer" @bind:event="oninput" class="form-control form-control-lg @(IsAiTyping ? "typing-caret" : "")" placeholder="The punchline" rows="2" disabled="@IsAiTyping"></textarea>
+                        </div>
+                    }
+
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary btn-lg flex-grow-1" @onclick="PostJoke" disabled="@(string.IsNullOrWhiteSpace(newJokeQuestion) || IsAiThinking || IsAiTyping)">Post Joke</button>
+                        <button class="btn btn-ai btn-lg" @onclick="GeneratePunchline" disabled="@(string.IsNullOrWhiteSpace(newJokeQuestion) || IsAiThinking || IsAiTyping)">
+                            ✨ Finish it
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info mb-5 text-center p-4">
+                <h4 style="color: #0C8599; font-family: 'Quicksand', sans-serif; font-weight: 700;">You're in the audience!</h4>
+                <p class="mb-0" style="color: #0C8599;">Please <a href="/Identity/Account/Login" style="color: #0B7285; text-decoration: underline;">log in</a> to post a joke and join the fun.</p>
+            </div>
+        }
+
+        @if (jokes == null)
+        {
+            <div class="text-center my-5">
+                <h4 style="color: var(--secondary-accent);">Warming up the crowd... (Loading)</h4>
+            </div>
+        }
+        else if (jokes.Count == 0)
+        {
+            <div class="text-center my-5">
+                <h4 style="color: var(--text-muted);">Tough crowd. No jokes found. Be the first!</h4>
+            </div>
+        }
+        else
+        {
+            foreach (var joke in jokes)
+            {
+                <div class="card mb-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h4 class="card-title font-weight-bold mb-0" style="color: var(--text-primary);">@joke.JokeQuestion</h4>
+                        </div>
+                        
+                        <p class="card-text mb-4" style="font-size: 1.25rem;">@joke.JokeAnswer</p>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-4 pt-3" style="border-top: 1px solid #F1F2F6;">
+                            <button class="btn @GetUpvoteBtnClass(joke) btn-sm px-4 py-2" @onclick="() => ToggleUpvote(joke.Id)">
+                                <span style="font-size: 1.2rem; margin-right: 6px;">❤️</span> @joke.Upvotes.Count 
+                            </button>
+                            <span class="text-muted small" style="font-family: 'Quicksand', sans-serif;">
+                                @("@")@(joke.User?.UserName ?? "Anonymous") &bull; @joke.CreatedAt.ToString("MMM dd")
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    private List<Joke> jokes;
+    private string currentUserId;
+    private string newJokeQuestion;
+    private string newJokeAnswer = "";
+    
+    private bool IsAiThinking = false;
+    private bool IsAiTyping = false;
+
+    // A list of random punchlines for the simulated AI
+    private readonly string[] aiPunchlines = new[] 
+    {
+        "Because it was over-byte!",
+        "To get to the other side... obviously.",
+        "Because he didn't get arrays.",
+        "It was tired of being stepped on.",
+        "They couldn't C#."
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        
+        if (user.Identity.IsAuthenticated)
+        {
+            currentUserId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        }
+
+        await LoadJokes();
+    }
+
+    private async Task LoadJokes()
+    {
+        jokes = await DbContext.Joke
+            .Include(j => j.User)
+            .Include(j => j.Upvotes)
+            .OrderByDescending(j => j.CreatedAt)
+            .ToListAsync();
+    }
+
+    private async Task PostJoke()
+    {
+        if (string.IsNullOrWhiteSpace(newJokeQuestion) || currentUserId == null) return;
+
+        var joke = new Joke
+        {
+            JokeQuestion = newJokeQuestion,
+            JokeAnswer = newJokeAnswer,
+            UserId = currentUserId
+        };
+
+        DbContext.Joke.Add(joke);
+        await DbContext.SaveChangesAsync();
+
+        newJokeQuestion = string.Empty;
+        newJokeAnswer = string.Empty;
+
+        await LoadJokes(); // Refresh feed
+    }
+
+    private async Task GeneratePunchline()
+    {
+        // 1. Enter thinking state (Beautiful UI Shimmer)
+        IsAiThinking = true;
+        newJokeAnswer = "";
+        StateHasChanged();
+        
+        // Simulate network delay / AI generating
+        await Task.Delay(2000);
+        
+        IsAiThinking = false;
+        IsAiTyping = true;
+        StateHasChanged();
+
+        // 2. Select random punchline
+        var random = new Random();
+        var fullPunchline = aiPunchlines[random.Next(aiPunchlines.Length)];
+        
+        // 3. Stream the text in character-by-character
+        foreach (var c in fullPunchline)
+        {
+            newJokeAnswer += c;
+            StateHasChanged();
+            await Task.Delay(40); // 40ms per char for a typing effect
+        }
+
+        // Wait a tiny bit then turn off typing caret
+        await Task.Delay(300);
+        IsAiTyping = false;
+        StateHasChanged();
+    }
+
+    private string GetUpvoteBtnClass(Joke joke)
+    {
+        if (currentUserId == null) return "btn-upvote";
+        
+        var hasUpvoted = joke.Upvotes.Any(u => u.UserId == currentUserId);
+        return hasUpvoted ? "btn-upvote active-upvote" : "btn-upvote";
+    }
+
+    private async Task ToggleUpvote(int jokeId)
+    {
+        if (currentUserId == null)
+        {
+            NavManager.NavigateTo("/Identity/Account/Login", forceLoad: true);
+            return;
+        }
+
+        var existingUpvote = await DbContext.Upvote
+            .FirstOrDefaultAsync(u => u.JokeId == jokeId && u.UserId == currentUserId);
+
+        if (existingUpvote != null)
+        {
+            DbContext.Upvote.Remove(existingUpvote);
+        }
+        else
+        {
+            var newUpvote = new Upvote
+            {
+                JokeId = jokeId,
+                UserId = currentUserId
+            };
+            DbContext.Upvote.Add(newUpvote);
+        }
+
+        await DbContext.SaveChangesAsync();
+        await LoadJokes();
+    }
+}

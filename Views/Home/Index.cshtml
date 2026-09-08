@@ -1,8 +1,6 @@
-﻿@{
+@{
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p> The foremost authority for good humor that you will find anywhere on your local host.</a>.</p>
-</div>
+<!-- The Joke Feed takes over the home page -->
+@(await Html.RenderComponentAsync<JOKEWEBAPPS.Components.JokeFeed>(RenderMode.ServerPrerendered))

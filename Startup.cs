@@ -1,4 +1,5 @@
 using JOKEWEBAPPS.Data;
+using JOKEWEBAPPS.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -35,6 +36,9 @@ namespace JOKEWEBAPPS
             services.AddControllersWithViews();
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            services.AddHttpClient();
+            services.AddScoped<GeminiJokeService>();
+            services.AddDatabaseDeveloperPageExceptionFilter();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -43,7 +47,6 @@ namespace JOKEWEBAPPS
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseDatabaseErrorPage();
             }
             else
             {

@@ -31,9 +31,32 @@
                             <a asp-action="Details" asp-route-id="@item.Id" class="text-muted mr-2" style="font-size: 0.9rem;">Details</a>
                             <a asp-action="Delete" asp-route-id="@item.Id" class="text-danger" style="font-size: 0.9rem;">Delete</a>
                         </div>
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="shareJoke(this.dataset.setup, this.dataset.punchline)" data-setup="@item.JokeQuestion" data-punchline="@item.JokeAnswer">Share</button>
                     </div>
                 </div>
             </div>
         </div>
     }
+</div>
+
+<!-- Share Fallback Modal -->
+<div class="modal fade" id="shareFallbackModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content" style="background-color: var(--surface-color); border: none; box-shadow: var(--hover-shadow);">
+      <div class="modal-header border-0">
+        <h5 class="modal-title font-weight-bold" style="color: var(--text-primary); font-family: 'Quicksand', sans-serif;">Share this joke!</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: var(--text-primary);">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body text-center pb-4">
+        <a id="whatsapp-share" target="_blank" class="btn btn-success m-2 px-4" style="border-radius: 12px; font-weight: 600;">WhatsApp</a>
+        <a id="twitter-share" target="_blank" class="btn btn-info m-2 px-4" style="border-radius: 12px; font-weight: 600;">Twitter</a>
+        <a id="facebook-share" target="_blank" class="btn btn-primary m-2 px-4" style="border-radius: 12px; font-weight: 600;">Facebook</a>
+        <div class="mt-3">
+          <a id="download-card" download="joke.png" class="btn btn-outline-secondary px-4" style="border-radius: 12px; font-weight: 600;">Download Image</a>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

@@ -391,3 +391,23 @@ a:hover {
 .theme-icon-dark { display: none; }
 [data-theme="dark"] .theme-icon-light { display: none; }
 [data-theme="dark"] .theme-icon-dark { display: block; }
+
+/* Streak Badge */
+.streak-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px; height: 48px;
+}
+.streak-emoji {
+  font-size: 44px;
+  position: absolute;
+}
+.streak-count {
+  position: relative;
+  font-weight: 800;
+  color: #fff;
+  font-size: 15px;         /* shrinks automatically below for big numbers */
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}

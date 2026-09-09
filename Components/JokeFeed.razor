@@ -5,6 +5,8 @@
 @inject ApplicationDbContext DbContext
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavManager
+@using JOKEWEBAPPS.Services
+@inject GeminiJokeService GeminiAI
 
 <div class="row">
     <div class="col-md-8 offset-md-2" style="max-width: 680px; margin: 0 auto;">
@@ -107,16 +109,6 @@
     private bool IsAiThinking = false;
     private bool IsAiTyping = false;
 
-    // A list of random punchlines for the simulated AI
-    private readonly string[] aiPunchlines = new[] 
-    {
-        "Because it was over-byte!",
-        "To get to the other side... obviously.",
-        "Because he didn't get arrays.",
-        "It was tired of being stepped on.",
-        "They couldn't C#."
-    };
-
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
@@ -166,23 +158,19 @@
         newJokeAnswer = "";
         StateHasChanged();
         
-        // Simulate network delay / AI generating
-        await Task.Delay(2000);
+        // 2. Call the real Gemini AI API!
+        var fullPunchline = await GeminiAI.GeneratePunchlineAsync(newJokeQuestion);
         
         IsAiThinking = false;
         IsAiTyping = true;
         StateHasChanged();
 
-        // 2. Select random punchline
-        var random = new Random();
-        var fullPunchline = aiPunchlines[random.Next(aiPunchlines.Length)];
-        
         // 3. Stream the text in character-by-character
         foreach (var c in fullPunchline)
         {
             newJokeAnswer += c;
             StateHasChanged();
-            await Task.Delay(40); // 40ms per char for a typing effect
+            await Task.Delay(30); // 30ms per char for a typing effect
         }
 
         // Wait a tiny bit then turn off typing caret
